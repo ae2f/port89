@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
+project(port89 LANGUAGES C)
+
 # Set this source directory as the tree root for project.
 set(ae2f_ProjRoot ${CMAKE_CURRENT_SOURCE_DIR} CACHE STRING "Tree root for project")
 set(ae2f_BinRoot ${CMAKE_CURRENT_BINARY_DIR} CACHE STRING "Tree root for project")
@@ -25,3 +27,6 @@ ae2f_CoreLibFetch(ae2f Core main)
 file(GLOB_RECURSE port89_src app/*)
 add_executable(port89 ${port89_src})
 target_link_libraries(port89 PRIVATE ae2f::Core)
+
+
+ae2f_UltraErrWERROR(port89 PRIVATE)

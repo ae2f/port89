@@ -8,7 +8,6 @@
 int main(int c_argc, const char* rd_argv[]);
 int main(int c_argc, const char* rd_argv[]) {
 	port89_t ret = port89_val(PORT89_OK);
-	long	len = -1;
 	FILE
 		*h = 0,
 		*h_r0 = 0,
@@ -19,15 +18,26 @@ int main(int c_argc, const char* rd_argv[]) {
 
 	while((c_argc -= 2) > 1) {
 		h		= fopen(rd_argv[c_argc], "r");
-		h_r0		= fopen(rd_argv[c_argc + 1], "w+");
+		h_r0		= tmpfile();
 		h_r1		= fopen(rd_argv[c_argc + 1], "w+");
 
 		if(!h)		RET(PORT89_FILE);
 		if(!h_r0)	RET(PORT89_FILE);
 		if(!h_r1)	RET(PORT89_FILE);
 
-		ae2f_ifnezerr(ret = port89_llong(rd_argv[1], h, h_r0))
+#define	h_ret	h_r1
+
+		ae2f_ifnezerr(ret = port89_llong(rd_argv[1], h, h_ret))
 			goto OUT;
+
+		fseek(h_r0, 0, SEEK_SET);
+
+#if	0
+		ae2f_ifnezerr(ret = port89_cenum(h_r0, h_r1))
+			goto OUT;
+#endif
+
+#undef	h_ret
 
 		fclose(h);
 		fclose(h_r0);

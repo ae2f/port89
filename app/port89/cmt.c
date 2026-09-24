@@ -1,0 +1,78 @@
+#include "./strcmt.h"
+#include "./cg.h"
+
+enum {
+	PORT89_CMT_ENTRY,
+	PORT89_CMT_ONELINER,
+	PORT89_CMT_STAR,
+	PORT89_CMT_STAR2
+};
+
+int port89_cmt(int ch, FILE* h_ifp, FILE* h_ofp) {
+	cgswtch(enum PORT89_, PORT89_CMT_ENTRY, name) {
+		cgcsdef(PORT89_CMT_ENTRY):
+		{
+			fputc(ch, h_ofp);
+			switch(ch) {
+				case '*':
+					ch = fgetc(h_ifp);
+					cgjmp(cgcase(PORT89_CMT_STAR), name);
+				case '/':
+					ch = fgetc(h_ifp);
+					cgjmp(cgcase(PORT89_CMT_ONELINER), name);
+				default:
+					return fgetc(h_ifp);
+			}
+		}
+
+		cgcsdef(PORT89_CMT_ONELINER): switch(ch) {
+			case '\n':
+				fputc(ch, h_ofp);
+				return fgetc(h_ifp);
+
+			case EOF:
+				return EOF;
+
+			case '\\':
+				fputc(ch, h_ofp);
+				ch = fgetc(h_ifp);
+				ae2f_fallthrough;
+
+			default:
+				fputc(ch, h_ofp);
+				ch = fgetc(h_ifp);
+				cgjmp(cgcase(PORT89_CMT_ONELINER), name);
+		}
+
+		cgcsdef(PORT89_CMT_STAR): switch(ch) {
+			case '*':
+				fputc(ch, h_ofp);
+				ch = fgetc(h_ifp);
+				cgjmp(cgcase(PORT89_CMT_STAR2), name);
+
+			case EOF:
+				return EOF;
+
+			default:
+				fputc(ch, h_ofp);
+				ch = fgetc(h_ifp);
+				cgjmp(cgcase(PORT89_CMT_STAR), name);
+		}
+
+		cgcsdef(PORT89_CMT_STAR2): switch(ch) {
+			case '/':
+				fputc(ch, h_ofp);
+				return fgetc(h_ifp);
+
+			case EOF:
+				return EOF;
+
+			default:
+				fputc(ch, h_ofp);
+				ch = fgetc(h_ifp);
+				cgjmp(cgcase(PORT89_CMT_STAR), name);
+		}
+	}
+
+	ae2f_unreachable();
+}

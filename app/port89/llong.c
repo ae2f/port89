@@ -3,6 +3,8 @@
 
 #include <ctype.h>
 
+#include "./strcmt.h"
+
 enum PORT89_LLONG_ {
 	PORT89_LLONG_DEFAULT,
 	PORT89_LLONG_FLUSH,
@@ -11,14 +13,6 @@ enum PORT89_LLONG_ {
 	PORT89_LLONG_LO,
 	PORT89_LLONG_LON,
 	PORT89_LLONG_LONG,
-
-	PORT89_LLONG_CMT_ENTRY,
-	PORT89_LLONG_CMT_ONELINER,
-	PORT89_LLONG_CMT_STAR,
-	PORT89_LLONG_CMT_STAR2,
-
-	PORT89_LLONG_STR,
-	PORT89_LLONG_CH,
 
 	PORT89_LLONG_END
 };
@@ -40,18 +34,18 @@ port89_t port89_llong(const char* rd_alter, FILE* h_ifp, FILE* h_ofp) {
 
 			case '/':
 				fputc(ch, h_ofp);
-				ch = getc(h_ifp);
-				cgjmp(cgcase(PORT89_LLONG_CMT_ENTRY), name);
+				ch = port89_cmt(fgetc(h_ifp), h_ifp, h_ofp);
+				cgjmp(cgcase(PORT89_LLONG_DEFAULT), name);
 
 			case '"':
 				fputc(ch, h_ofp);
-				ch = getc(h_ifp);
-				cgjmp(cgcase(PORT89_LLONG_STR), name);
+				ch = port89_str(fgetc(h_ifp), h_ifp, h_ofp);
+				cgjmp(cgcase(PORT89_LLONG_DEFAULT), name);
 
 			case '\'':
 				fputc(ch, h_ofp);
-				ch = getc(h_ifp);
-				cgjmp(cgcase(PORT89_LLONG_CH), name);
+				ch = port89_ch(fgetc(h_ifp), h_ifp, h_ofp);
+				cgjmp(cgcase(PORT89_LLONG_DEFAULT), name);
 
 			default:
 				if(isspace(ch)) {
@@ -143,98 +137,6 @@ port89_t port89_llong(const char* rd_alter, FILE* h_ifp, FILE* h_ofp) {
 				cgjmp(cgcase(PORT89_LLONG_FLUSH), name);
 			}
 		}
-
-		/*************************/
-
-		cgcsdef(PORT89_LLONG_CMT_ENTRY):
-		{
-			fputc(ch, h_ofp);
-			switch(ch) {
-				case '*':
-					ch = fgetc(h_ifp);
-					cgjmp(cgcase(PORT89_LLONG_CMT_STAR), name);
-				case '/':
-					ch = fgetc(h_ifp);
-					cgjmp(cgcase(PORT89_LLONG_CMT_ONELINER), name);
-				default:
-					ch = fgetc(h_ifp);
-					cgjmp(cgcase(PORT89_LLONG_FLUSH), name);
-			}
-		}
-
-		cgcsdef(PORT89_LLONG_CMT_ONELINER): switch(ch) {
-			case '\n':
-				fputc(ch, h_ofp);
-				ch = fgetc(h_ifp);
-				cgjmp(cgcase(PORT89_LLONG_DEFAULT), name);
-
-			default:
-				fputc(ch, h_ofp);
-				ch = fgetc(h_ifp);
-				cgjmp(cgcase(PORT89_LLONG_CMT_ONELINER), name);
-		}
-
-		cgcsdef(PORT89_LLONG_CMT_STAR): switch(ch) {
-			case '*':
-				fputc(ch, h_ofp);
-				ch = fgetc(h_ifp);
-				cgjmp(cgcase(PORT89_LLONG_CMT_STAR2), name);
-
-			default:
-				fputc(ch, h_ofp);
-				ch = fgetc(h_ifp);
-				cgjmp(cgcase(PORT89_LLONG_CMT_STAR), name);
-		}
-
-		cgcsdef(PORT89_LLONG_CMT_STAR2): switch(ch) {
-			case '/':
-				fputc(ch, h_ofp);
-				ch = fgetc(h_ifp);
-				cgjmp(cgcase(PORT89_LLONG_DEFAULT), name);
-
-			default:
-				fputc(ch, h_ofp);
-				ch = fgetc(h_ifp);
-				cgjmp(cgcase(PORT89_LLONG_CMT_STAR), name);
-		} 
-
-		/*************************/
-
-		cgcsdef(PORT89_LLONG_STR): switch(ch) {
-			case '"':
-				fputc(ch, h_ofp);
-				ch = fgetc(h_ifp);
-				cgjmp(cgcase(PORT89_LLONG_DEFAULT), name);
-
-			case '\\':
-				fputc(ch, h_ofp);
-				ch = fgetc(h_ifp);
-				ae2f_fallthrough;
-
-			default:
-				fputc(ch, h_ofp);
-				ch = fgetc(h_ifp);
-				cgjmp(cgcase(PORT89_LLONG_STR), name);
-		} 
-
-		/*************************/
-
-		cgcsdef(PORT89_LLONG_CH): switch(ch) {
-			case '\'':
-				fputc(ch, h_ofp);
-				ch = fgetc(h_ifp);
-				cgjmp(cgcase(PORT89_LLONG_DEFAULT), name);
-
-			case '\\':
-				fputc(ch, h_ofp);
-				ch = fgetc(h_ifp);
-				ae2f_fallthrough;
-
-			default:
-				fputc(ch, h_ofp);
-				ch = fgetc(h_ifp);
-				cgjmp(cgcase(PORT89_LLONG_CH), name);
-		} 
 
 		/*************************/
 

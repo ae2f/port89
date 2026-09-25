@@ -1,5 +1,5 @@
 #include "./port89/llong.h"
-#include "./port89/cenum.h"
+#include "./port89/scomma.h"
 
 #include <ae2f/cc/branches/naive.h>
 
@@ -27,15 +27,19 @@ int main(int c_argc, const char* rd_argv[]) {
 
 #define	h_ret	h_r1
 
-		ae2f_ifnezerr(ret = port89_llong(rd_argv[1], h, h_ret))
+		ae2f_ifnezerr(ret = port89_llong(
+					rd_argv[1]
+					, h
+					, h_r0))
 			goto OUT;
+
 
 		fseek(h_r0, 0, SEEK_SET);
 
-#if	0
-		ae2f_ifnezerr(ret = port89_cenum(h_r0, h_r1))
+		ae2f_ifnezerr(ret = port89_scomma(
+					h_r0
+					, h_ret))
 			goto OUT;
-#endif
 
 #undef	h_ret
 

@@ -1,9 +1,10 @@
 #include "./llong.h"
 #include "./cg.h"
+#include "./strcmt.h"
+#include "./flush.h"
 
 #include <ctype.h>
 
-#include "./strcmt.h"
 
 enum PORT89_LLONG_ {
 	PORT89_LLONG_DEFAULT,
@@ -19,7 +20,7 @@ enum PORT89_LLONG_ {
 
 typedef int port89_bool_t;
 
-port89_t port89_llong(const char* rd_alter, FILE* h_ifp, FILE* h_ofp) {
+port89_t port89_llong(const char* rd_ll, FILE* h_ifp, FILE* h_ofp) {
 	port89_t r = port89_val(PORT89_OK);
 	port89_bool_t found = 0;
 	int ch = fgetc(h_ifp);
@@ -65,16 +66,8 @@ port89_t port89_llong(const char* rd_alter, FILE* h_ifp, FILE* h_ofp) {
 		cgcsdef(PORT89_LLONG_FLUSH):
 		{
 			found = 0;	/** resetting the shxt */
-
-			if(isspace(ch)) {
-				cgjmp(cgcase(PORT89_LLONG_DEFAULT), name);
-			} else if(ch == EOF) {
-				cgjmp(cgcase(PORT89_LLONG_END), name);
-			} else {
-				fputc(ch, h_ofp);
-				ch = fgetc(h_ifp);
-				cgjmp(cgcase(PORT89_LLONG_FLUSH), name);
-			}
+			ch = port89_flush(ch, h_ifp, h_ofp);
+			cgjmp(ch == EOF ? cgcase(PORT89_LLONG_END) : cgcase(PORT89_LLONG_DEFAULT), name);
 		}
 
 		cgcsdef(PORT89_LLONG_L):
@@ -122,7 +115,7 @@ port89_t port89_llong(const char* rd_alter, FILE* h_ifp, FILE* h_ofp) {
 				if(found++) {
 					/** emit new */
 					found = 0;
-					fputs(rd_alter, h_ofp);
+					fputs(rd_ll, h_ofp);
 				}
 
 				fputc(ch, h_ofp);

@@ -1,7 +1,7 @@
 #include "./strcmt.h"
 #include "./cg.h"
 
-enum {
+enum PORT89_CMT_ {
 	PORT89_CMT_ENTRY,
 	PORT89_CMT_ONELINER,
 	PORT89_CMT_STAR,
@@ -9,10 +9,10 @@ enum {
 };
 
 int port89_cmt(int ch, FILE* h_ifp, FILE* h_ofp) {
-	cgswtch(enum PORT89_, PORT89_CMT_ENTRY, name) {
-		cgcsdef(PORT89_CMT_ENTRY):
+	cgswtch(enum PORT89_CMT_, PORT89_CMT_ENTRY, name) {
+		cgdefault(PORT89_CMT_ENTRY):
 		{
-			fputc(ch, h_ofp);
+			fputc('*', h_ofp);
 			switch(ch) {
 				case '*':
 					ch = fgetc(h_ifp);
@@ -27,11 +27,16 @@ int port89_cmt(int ch, FILE* h_ifp, FILE* h_ofp) {
 
 		cgcsdef(PORT89_CMT_ONELINER): switch(ch) {
 			case '\n':
-				fputc(ch, h_ofp);
+				fputs(" */\n", h_ofp);
 				return fgetc(h_ifp);
 
 			case EOF:
 				return EOF;
+
+			case '/':
+				fputs("\\/", h_ofp);
+				ch = fgetc(h_ifp);
+				cgjmp(cgcase(PORT89_CMT_ONELINER), name);
 
 			case '\\':
 				fputc(ch, h_ofp);

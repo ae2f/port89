@@ -3,6 +3,7 @@
 #include "./strcmt.h"
 
 #include <ctype.h>
+#include <ae2f/cc/switchctl.h>
 
 enum PORT89_SCOMMA_ {
 	PORT89_SCOMMA_DEFAULT,
@@ -53,6 +54,24 @@ port89_t port89_scomma(FILE* h_ifp, FILE* h_ofp) {
 				fputs(",", h_ofp);
 				ch = fgetc(h_ifp);
 				cgjmp(cgcase(PORT89_SCOMMA_COMMA), name);
+
+			case '/':
+				fputc(ch, h_ofp);
+				ch = port89_cmt(fgetc(h_ifp), h_ifp, h_ofp);
+				cgjmp(cgcase(PORT89_SCOMMA_COMMA), name);
+
+			case '"':
+				fputc(ch, h_ofp);
+				ch = port89_str(fgetc(h_ifp), h_ifp, h_ofp);
+				cgjmp(cgcase(PORT89_SCOMMA_DEFAULT), name);
+
+			case '\'':
+				fputc(ch, h_ofp);
+				ch = port89_ch(fgetc(h_ifp), h_ifp, h_ofp);
+				cgjmp(cgcase(PORT89_SCOMMA_COMMA), name);
+
+			case EOF:
+				cgjmp(cgcase(PORT89_SCOMMA_END), name);
 
 			case ';':
 			case '>':

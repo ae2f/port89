@@ -12,15 +12,17 @@ int port89_cmt(int ch, FILE* h_ifp, FILE* h_ofp) {
 	cgswtch(enum PORT89_CMT_, PORT89_CMT_ENTRY, name) {
 		cgdefault(PORT89_CMT_ENTRY):
 		{
-			fputc('*', h_ofp);
 			switch(ch) {
 				case '*':
+					fputc('*', h_ofp);
 					ch = fgetc(h_ifp);
 					cgjmp(cgcase(PORT89_CMT_STAR), name);
 				case '/':
+					fputc('*', h_ofp);
 					ch = fgetc(h_ifp);
 					cgjmp(cgcase(PORT89_CMT_ONELINER), name);
 				default:
+					fputc(ch, h_ofp);
 					return fgetc(h_ifp);
 			}
 		}

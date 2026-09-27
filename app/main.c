@@ -13,10 +13,10 @@ int main(int c_argc, const char* rd_argv[]) {
 		*h_r0 = 0,
 		*h_r1 = 0;	/**/;
 
-	if(c_argc < 4)		RET(PORT89_ARGS);
-	if((c_argc & 1))	RET(PORT89_ARGS);
+	if(c_argc < 5)		RET(PORT89_ARGS);
+	if((~c_argc & 1))	RET(PORT89_ARGS);
 
-	while((c_argc -= 2) > 1) {
+	while((c_argc -= 2) > 2) {
 		h		= fopen(rd_argv[c_argc], "r");
 		h_r0		= tmpfile();
 		h_r1		= fopen(rd_argv[c_argc + 1], "w+");
@@ -29,6 +29,7 @@ int main(int c_argc, const char* rd_argv[]) {
 
 		ae2f_ifnezerr(ret = port89_llong(
 					rd_argv[1]
+					, rd_argv[2]
 					, h
 					, h_r0))
 			goto OUT;

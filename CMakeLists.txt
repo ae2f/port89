@@ -26,7 +26,7 @@ ae2f_CoreLibFetch(ae2f Core main)
 
 file(GLOB_RECURSE port89_src app/*)
 add_executable(port89 ${port89_src})
-target_link_libraries(port89 PRIVATE ae2f::Core)
+target_link_libraries(port89 PUBLIC ae2f-Core)
 
 
 ae2f_UltraErrWERROR(port89 PRIVATE)

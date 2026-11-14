@@ -36,6 +36,7 @@ int main(int c_argc, const char* rd_argv[]) {
 
 
 		fseek(h_r0, 0, SEEK_SET);
+		fputs("/* cppcheck-suppress-file * */\n", h_ret);
 
 		ae2f_ifnezerr(ret = port89_scomma(
 					h_r0
